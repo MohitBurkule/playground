@@ -128,7 +128,7 @@ export function regressGaussian(numSamples: number, noise: number):
     let noiseX = randUniform(-radius, radius) * noise;
     let noiseY = randUniform(-radius, radius) * noise;
     let label = getLabel(x + noiseX, y + noiseY);
-    points.push({x, y, label});
+    points.push({x, label});// removed y 
   };
   return points;
 }
