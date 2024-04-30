@@ -13,6 +13,6 @@ To run the visualization locally, follow these steps:
 3. Run `npm run serve` to serve from the `dist/` directory and open a page on your browser.
 4. For a fast edit-refresh cycle when developing, run `npm run serve-watch`. This will start an HTTP server and automatically recompile the TypeScript, HTML, and CSS files whenever they change. 🔄
 
-## For Owners 
+## For Owners 💼
 
 To push to production, use the command: `git subtree push --prefix dist origin gh-pages`. 🚀
