@@ -1,4 +1,4 @@
-# 🌟 Deep Playground Plus: a Project of MLS club SupCom 🚀
+# 🌟 Deep Playground ++: a Project of MLS club SupCom 🚀
 
 Deep Playground Plus is an enhanced version of Deep playground, an interactive visualization of neural networks written in TypeScript using d3.js. We've added a new exciting feature that allows users to change the input of the neural network based on their preferences! 🎨🧠
 
