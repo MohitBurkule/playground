@@ -158,7 +158,7 @@ export function classifyCircleData(numSamples: number, noise: number):
   let points: Example2D[] = [];
   let radius = 5;
   function getCircleLabel(p: Point, center: Point) {
-    return (dist(p, center) < (radius * 0.5)) ? 1 : -1;
+    return (dist(p, center) < (radius * 0.6)) ? 1 : -1;
   }
 
   // Generate positive points inside the circle.
