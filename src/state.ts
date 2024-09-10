@@ -39,14 +39,19 @@ export let datasets: {[key: string]: dataset.DataGenerator} = {
   "xor": dataset.classifyXORData,
   "gauss": dataset.classifyTwoGaussData,
   "spiral": dataset.classifySpiralData,
-  "concentric-circles": dataset.classifyConcentricCircles
+  "concentric-circles": dataset.classifyConcentricCircles,
+  "biclusters": dataset.classifyBiclusters,
+  "moons": dataset.classifyMoons
 };
 
 /** A map between dataset names and functions that generate regression data. */
 export let regDatasets: {[key: string]: dataset.DataGenerator} = {
   "reg-plane": dataset.regressPlane,
   "reg-gauss": dataset.regressGaussian,
-  "reg-sine-wave": dataset.regressSineWave
+  "reg-sine-wave": dataset.regressSineWave,
+  "reg-friedman1": dataset.regressFriedman1,
+  "reg-friedman2": dataset.regressFriedman2,
+  "reg-friedman3": dataset.regressFriedman3
 };
 
 export function getKeyFromValue(obj: any, value: any): string {

@@ -244,6 +244,101 @@ export function regressSineWave(numSamples: number, noise: number): Example2D[] 
 }
 
 /**
+ * Generates a biclusters dataset for classification.
+ */
+export function classifyBiclusters(numSamples: number, noise: number): Example2D[] {
+  let points: Example2D[] = [];
+  let n = numSamples / 2;
+
+  for (let i = 0; i < n; i++) {
+    let x = randUniform(-5, 5);
+    let y = x + randUniform(-1, 1) * noise;
+    points.push({x, y, label: 1});
+  }
+
+  for (let i = 0; i < n; i++) {
+    let x = randUniform(-5, 5);
+    let y = -x + randUniform(-1, 1) * noise;
+    points.push({x, y, label: -1});
+  }
+
+  return points;
+}
+
+/**
+ * Generates a moons dataset for classification.
+ */
+export function classifyMoons(numSamples: number, noise: number): Example2D[] {
+  let points: Example2D[] = [];
+  let n = numSamples / 2;
+
+  for (let i = 0; i < n; i++) {
+    let angle = Math.PI * i / n;
+    let x = Math.cos(angle) + randUniform(-1, 1) * noise;
+    let y = Math.sin(angle) + randUniform(-1, 1) * noise;
+    points.push({x, y, label: 1});
+  }
+
+  for (let i = 0; i < n; i++) {
+    let angle = Math.PI * i / n;
+    let x = 1 - Math.cos(angle) + randUniform(-1, 1) * noise;
+    let y = 1 - Math.sin(angle) - 0.5 + randUniform(-1, 1) * noise;
+    points.push({x, y, label: -1});
+  }
+
+  return points;
+}
+
+/**
+ * Generates a Friedman 1 dataset for regression.
+ */
+export function regressFriedman1(numSamples: number, noise: number): Example2D[] {
+  let points: Example2D[] = [];
+  for (let i = 0; i < numSamples; i++) {
+    let x1 = randUniform(0, 1);
+    let x2 = randUniform(0, 1);
+    let x3 = randUniform(0, 1);
+    let x4 = randUniform(0, 1);
+    let x5 = randUniform(0, 1);
+    let y = 10 * Math.sin(Math.PI * x1 * x2) + 20 * Math.pow(x3 - 0.5, 2) + 10 * x4 + 5 * x5 + randUniform(-1, 1) * noise;
+    points.push({x: x1, y: y, label: y});
+  }
+  return points;
+}
+
+/**
+ * Generates a Friedman 2 dataset for regression.
+ */
+export function regressFriedman2(numSamples: number, noise: number): Example2D[] {
+  let points: Example2D[] = [];
+  for (let i = 0; i < numSamples; i++) {
+    let x1 = randUniform(0, 100);
+    let x2 = randUniform(40 * Math.PI, 560 * Math.PI);
+    let x3 = randUniform(0, 1);
+    let x4 = randUniform(1, 11);
+    let y = Math.sqrt(x1 * x1 + (x2 * x3 - 1 / (x2 * x4)) ** 2) + randUniform(-1, 1) * noise;
+    points.push({x: x1, y: y, label: y});
+  }
+  return points;
+}
+
+/**
+ * Generates a Friedman 3 dataset for regression.
+ */
+export function regressFriedman3(numSamples: number, noise: number): Example2D[] {
+  let points: Example2D[] = [];
+  for (let i = 0; i < numSamples; i++) {
+    let x1 = randUniform(0, 100);
+    let x2 = randUniform(40 * Math.PI, 560 * Math.PI);
+    let x3 = randUniform(0, 1);
+    let x4 = randUniform(1, 11);
+    let y = Math.atan((x2 * x3 - 1 / (x2 * x4)) / x1) + randUniform(-1, 1) * noise;
+    points.push({x: x1, y: y, label: y});
+  }
+  return points;
+}
+
+/**
  * Returns a sample from a uniform [a, b] distribution.
  * Uses the seedrandom library as the random generator.
  */
