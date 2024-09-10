@@ -57,20 +57,18 @@ export class HeatMap {
         this.settings[prop] = userSettings[prop];
       }
     }
-    window.onload = () => {
-      console.log(container);
+    console.log(container)
 
-      this.canvas = d3.select(container).append("canvas")
-        .attr("width", width)
-        .attr("height", height)
-        .style("position", "absolute")
-        .style("top", "0px")
-        .style("left", "0px");
+    this.canvas = d3.select(container).append("canvas")
+      .attr("width", width)
+      .attr("height", height)
+      .style("position", "absolute")
+      .style("top", "0px")
+      .style("left", "0px");
 
-      this.svg = d3.select(container).append("svg")
-        .attr("width", width)
-        .attr("height", width);
-    };
+    this.svg = d3.select(container).append("svg")
+      .attr("width", width)
+      .attr("height", width)
 
 
     this.xScale = d3.scale.linear().domain(xDomain).range([0, width]);
