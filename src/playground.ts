@@ -63,20 +63,15 @@ interface InputFeature {
 }
 
 let INPUTS: {[name: string]: InputFeature} = {
-  "x": {f: (x, y, z) => x, label: "X_1"},
-  "y": {f: (x, y, z) => y, label: "X_2"},
-  "z": {f: (x, y, z) => z, label: "X_3"},
-  "xSquared": {f: (x, y, z) => x * x, label: "X_1^2"},
-  "ySquared": {f: (x, y, z) => y * y, label: "X_2^2"},
-  "zSquared": {f: (x, y, z) => z * z, label: "X_3^2"},
-  "xTimesY": {f: (x, y, z) => x * y, label: "X_1X_2"},
-  "xTimesZ": {f: (x, y, z) => x * z, label: "X_1X_3"},
-  "yTimesZ": {f: (x, y, z) => y * z, label: "X_2X_3"},
-  "sinX": {f: (x, y, z) => Math.sin(x), label: "sin(X_1)"},
-  "sinY": {f: (x, y, z) => Math.sin(y), label: "sin(X_2)"},
-  "sinZ": {f: (x, y, z) => Math.sin(z), label: "sin(X_3)"},
-  "atan2YX": {f: (x, y, z) => Math.atan2(y, x), label: "sptheta"},
-  "normXYZ": {f: (x, y, z) => Math.sqrt(x * x + y * y + z * z), label: "spradius"},
+  "x": {f: (x, y) => x, label: "X_1"},
+  "y": {f: (x, y) => y, label: "X_2"},
+  "xSquared": {f: (x, y) => x * x, label: "X_1^2"},
+  "ySquared": {f: (x, y) => y * y,  label: "X_2^2"},
+  "xTimesY": {f: (x, y) => x * y, label: "X_1X_2"},
+  "sinX": {f: (x, y) => Math.sin(x), label: "sin(X_1)"},
+  "sinY": {f: (x, y) => Math.sin(y), label: "sin(X_2)"},
+  "atan2YX":{f: (x,y) => Math.atan2(y,x), label: "sptheta"},
+  "normXY":{f: (x,y) => Math.sqrt(x*x+y*y), label: "spradius"},
     
 };
 
@@ -904,11 +899,11 @@ function constructInputIds(): string[] {
   return result;
 }
 
-function constructInput(x: number, y: number, z: number): number[] {
+function constructInput(x: number, y: number): number[] {
   let input: number[] = [];
   for (let inputName in INPUTS) {
     if (state[inputName]) {
-      input.push(INPUTS[inputName].f(x, y, z));
+      input.push(INPUTS[inputName].f(x, y));
     }
   }
   return input;
