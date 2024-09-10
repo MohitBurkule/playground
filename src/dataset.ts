@@ -21,14 +21,12 @@ import * as d3 from 'd3';
 export type Example2D = {
   x: number,
   y: number,
-  z: number,
   label: number
 };
 
 type Point = {
   x: number,
-  y: number,
-  z?: number
+  y: number
 };
 
 /**
@@ -65,9 +63,7 @@ export function classifyTwoGaussData(numSamples: number, noise: number):
     for (let i = 0; i < numSamples / 2; i++) {
       let x = normalRandom(cx, variance);
       let y = normalRandom(cy, variance);
-      let z = normalRandom(cy, variance);
-
-      points.push({x, y,z, label});
+      points.push({x, y, label});
     }
   }
 
@@ -82,18 +78,16 @@ export function regressPlane(numSamples: number, noise: number):
   let labelScale = d3.scale.linear()
     .domain([-10, 10])
     .range([-1, 1]);
-  let getLabel = (x, y,z) => labelScale(x + y+z);
+  let getLabel = (x, y) => labelScale(x + y);
 
   let points: Example2D[] = [];
   for (let i = 0; i < numSamples; i++) {
     let x = randUniform(-radius, radius);
     let y = randUniform(-radius, radius);
-    let z = randUniform(-radius, radius);
     let noiseX = randUniform(-radius, radius) * noise;
     let noiseY = randUniform(-radius, radius) * noise;
-    let noiseZ = randUniform(-radius, radius) * noise;
-    let label = getLabel(x + noiseX, y + noiseY, z + noiseZ);
-    points.push({x, y,z, label});
+    let label = getLabel(x + noiseX, y + noiseY);
+    points.push({x, y, label});
   }
   return points;
 }
@@ -116,10 +110,10 @@ export function regressGaussian(numSamples: number, noise: number):
     [4, -2.5, -1]
   ];
 
-  function getLabel(x, y,z) {
+  function getLabel(x, y) {
     // Choose the one that is maximum in abs value.
     let label = 0;
-    gaussians.forEach(([cx, cy,cz , sign]) => {//TODO: fix cz later
+    gaussians.forEach(([cx, cy, sign]) => {
       let newLabel = sign * labelScale(dist({x, y}, {x: cx, y: cy}));
       if (Math.abs(newLabel) > Math.abs(label)) {
         label = newLabel;
@@ -131,12 +125,10 @@ export function regressGaussian(numSamples: number, noise: number):
   for (let i = 0; i < numSamples; i++) {
     let x = randUniform(-radius, radius);
     let y = randUniform(-radius, radius);
-    let z = randUniform(-radius, radius);
     let noiseX = randUniform(-radius, radius) * noise;
     let noiseY = randUniform(-radius, radius) * noise;
-    let noiseZ = randUniform(-radius, radius) * noise;
-    let label = getLabel(x + noiseX, y + noiseY, z + noiseZ);
-    points.push({x, y,z, label});
+    let label = getLabel(x + noiseX, y + noiseY);
+    points.push({x,y, label});
   };
   return points;
 }
@@ -152,8 +144,7 @@ export function classifySpiralData(numSamples: number, noise: number):
       let t = 1.75 * i / n * 2 * Math.PI + deltaT;
       let x = r * Math.sin(t) + randUniform(-1, 1) * noise;
       let y = r * Math.cos(t) + randUniform(-1, 1) * noise;
-      let z = r * Math.cos(t) + randUniform(-1, 1) * noise;//TODO: Fix this later
-      points.push({x, y,z, label});
+      points.push({x, y, label});
     }
   }
 
@@ -210,11 +201,10 @@ export function classifyXORData(numSamples: number, noise: number):
     x += x > 0 ? padding : -padding;  // Padding.
     let y = randUniform(-5, 5);
     y += y > 0 ? padding : -padding;
-    let z = randUniform(-5, 5); // Add a third dimension#TODO: fix this later
     let noiseX = randUniform(-5, 5) * noise;
     let noiseY = randUniform(-5, 5) * noise;
     let label = getXORLabel({x: x + noiseX, y: y + noiseY});
-    points.push({x, y,z, label});
+    points.push({x, y, label});
   }
   return points;
 }
@@ -231,8 +221,7 @@ export function classifyConcentricCircles(numSamples: number, noise: number): Ex
       let angle = randUniform(0, 2 * Math.PI);
       let x = radius * Math.cos(angle) + randUniform(-1, 1) * noise;
       let y = radius * Math.sin(angle) + randUniform(-1, 1) * noise;
-      let z = radius * Math.sin(angle) + randUniform(-1, 1) * noise;
-      points.push({x, y,z, label});
+      points.push({x, y, label});
     }
   }
 
@@ -251,9 +240,8 @@ export function regressSineWave(numSamples: number, noise: number): Example2D[] 
 
   for (let i = 0; i < numSamples; i++) {
     let x = randUniform(-10, 10);
-    let z = randUniform(-10, 10);//TODO: fix this later
     let y = amplitude * Math.sin(frequency * x) + randUniform(-1, 1) * noise;
-    points.push({x, y,z, label: y});
+    points.push({x, y, label: y});
   }
   return points;
 }
@@ -267,16 +255,14 @@ export function classifyBiclusters(numSamples: number, noise: number): Example2D
 
   for (let i = 0; i < n; i++) {
     let x = randUniform(-5, 5);
-    let z = randUniform(-5, 5);//TODO: fix this later
     let y = x + randUniform(-1, 1) * noise;
-    points.push({x, y,z, label: 1});
+    points.push({x, y, label: 1});
   }
 
   for (let i = 0; i < n; i++) {
     let x = randUniform(-5, 5);
-    let z = randUniform(-5, 5);//TODO: fix this later
     let y = -x + randUniform(-1, 1) * noise;
-    points.push({x, y,z, label: -1});
+    points.push({x, y, label: -1});
   }
 
   return points;
@@ -293,16 +279,14 @@ export function classifyMoons(numSamples: number, noise: number): Example2D[] {
     let angle = Math.PI * i / n;
     let x = Math.cos(angle) + randUniform(-1, 1) * noise;
     let y = Math.sin(angle) + randUniform(-1, 1) * noise;
-    let z = Math.sin(angle) + randUniform(-1, 1) * noise;
-    points.push({x, y,z, label: 1});
+    points.push({x, y, label: 1});
   }
 
   for (let i = 0; i < n; i++) {
     let angle = Math.PI * i / n;
     let x = 1 - Math.cos(angle) + randUniform(-1, 1) * noise;
     let y = 1 - Math.sin(angle) - 0.5 + randUniform(-1, 1) * noise;
-    let z = 1 - Math.sin(angle) - 0.5 + randUniform(-1, 1) * noise;
-    points.push({x, y,z, label: -1});
+    points.push({x, y, label: -1});
   }
 
   return points;
@@ -320,8 +304,7 @@ export function regressFriedman1(numSamples: number, noise: number): Example2D[]
     let x4 = randUniform(0, 1);
     let x5 = randUniform(0, 1);
     let y = 10 * Math.sin(Math.PI * x1 * x2) + 20 * Math.pow(x3 - 0.5, 2) + 10 * x4 + 5 * x5 + randUniform(-1, 1) * noise;
-    let z = 10 * Math.sin(Math.PI * x1 * x2) + 20 * Math.pow(x3 - 0.5, 2) + 10 * x4 + 5 * x5 + randUniform(-1, 1) * noise;//TODO: fix this later
-    points.push({x: x1, y: y,z:z, label: y});
+    points.push({x: x1, y: y, label: y});
   }
   return points;
 }
@@ -337,7 +320,7 @@ export function regressFriedman2(numSamples: number, noise: number): Example2D[]
     let x3 = randUniform(0, 1);
     let x4 = randUniform(1, 11);
     let y = Math.sqrt(x1 * x1 + (x2 * x3 - 1 / (x2 * x4)) ** 2) + randUniform(-1, 1) * noise;
-    points.push({x: x1, y: y,z:y, label: y});//TODO: fix this later
+    points.push({x: x1, y: y, label: y});
   }
   return points;
 }
@@ -353,7 +336,7 @@ export function regressFriedman3(numSamples: number, noise: number): Example2D[]
     let x3 = randUniform(0, 1);
     let x4 = randUniform(1, 11);
     let y = Math.atan((x2 * x3 - 1 / (x2 * x4)) / x1) + randUniform(-1, 1) * noise;
-    points.push({x: x1, y: y,z:y, label: y});//TODO: fix this later
+    points.push({x: x1, y: y, label: y});
   }
   return points;
 }
