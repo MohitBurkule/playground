@@ -15,7 +15,6 @@ limitations under the License.
 
 import {Example2D} from "./dataset";
 import * as d3 from 'd3';
-import * as d3ScaleChromatic from 'd3-scale-chromatic';
 
 export interface HeatMapSettings {
   [key: string]: any;
@@ -36,7 +35,6 @@ export class HeatMap {
     showAxes: false,
     noSvg: false
   };
-  private svg;
   private xScale;
   private yScale;
   private colorScale;
@@ -64,11 +62,21 @@ export class HeatMap {
       .attr("width", width)
       .attr("height", width);
 
-    this.xScale = d3.scaleLinear().domain(xDomain).range([0, width]);
-    this.yScale = d3.scaleLinear().domain(yDomain).range([width, 0]);
+    this.xScale = d3.scale.linear().domain(xDomain).range([0, width]);
+    this.yScale = d3.scale.linear().domain(yDomain).range([width, 0]);
 
-    this.colorScale = d3.scaleSequential(d3ScaleChromatic.interpolateViridis)
-      .domain([0, 1]);
+    // Viridis color scale values (can be customized for more granularity)
+    let viridisColors: number[];
+    viridisColors = [
+        0x440154, 0x482878, 0x3e4989, 0x31688e, 0x26828e, 0x1f9e89,
+        0x35b779, 0x6ece58, 0xb5de2b, 0xfde725
+    ];
+
+    // Create a linear color scale using the viridis color scheme
+    this.colorScale = d3.scale.linear()
+        .domain([0, 1])  // Input domain [0, 1]
+        .range(viridisColors);  // Viridis colors
+
 
     this.svg.selectAll("rect")
       .data(d3.range(numSamples * numSamples))
