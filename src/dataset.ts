@@ -153,8 +153,7 @@ export function classifySpiralData(numSamples: number, noise: number):
   return points;
 }
 
-export function classifyCircleData(numSamples: number, noise: number):
-    Example2D[] {
+export function classifyCircleData(numSamples: number, noise: number): Example2D[] {
   let points: Example2D[] = [];
   let radius = 5;
   function getCircleLabel(p: Point, center: Point) {
@@ -163,26 +162,30 @@ export function classifyCircleData(numSamples: number, noise: number):
 
   // Generate positive points inside the circle.
   for (let i = 0; i < numSamples / 2; i++) {
-    let r = radius*0.5;//randUniform(0, radius * 0.5);
+    let r = radius * 0.5;
     let angle = randUniform(0, 2 * Math.PI);
     let x = r * Math.sin(angle);
     let y = r * Math.cos(angle);
+    let z = randUniform(-radius, radius); // Add a third dimension
     let noiseX = randUniform(-radius, radius) * noise;
     let noiseY = randUniform(-radius, radius) * noise;
-    let label = getCircleLabel({x: x + noiseX, y: y + noiseY}, {x: 0, y: 0});
-    points.push({x, y, label});
+    let noiseZ = randUniform(-radius, radius) * noise; // Noise for z
+    let label = getCircleLabel({x: x + noiseX, y: y + noiseY, z: z + noiseZ}, {x: 0, y: 0, z: 0});
+    points.push({x, y, z, label});
   }
 
   // Generate negative points outside the circle.
   for (let i = 0; i < numSamples / 2; i++) {
-    let r = radius*0.7//randUniform(radius * 0.7, radius);
+    let r = radius * 0.7;
     let angle = randUniform(0, 2 * Math.PI);
     let x = r * Math.sin(angle);
     let y = r * Math.cos(angle);
+    let z = randUniform(-radius, radius); // Add a third dimension
     let noiseX = randUniform(-radius, radius) * noise;
     let noiseY = randUniform(-radius, radius) * noise;
-    let label = getCircleLabel({x: x + noiseX, y: y + noiseY}, {x: 0, y: 0});
-    points.push({x, y, label});
+    let noiseZ = randUniform(-radius, radius) * noise; // Noise for z
+    let label = getCircleLabel({x: x + noiseX, y: y + noiseY, z: z + noiseZ}, {x: 0, y: 0, z: 0});
+    points.push({x, y, z, label});
   }
   return points;
 }
