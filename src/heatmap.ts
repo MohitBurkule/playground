@@ -59,7 +59,14 @@ export class HeatMap {
     }
     console.log(container)
 
-    this.svg = d3.select("svg")//.append("svg")
+    this.canvas = d3.select(container).append("canvas")
+      .attr("width", width)
+      .attr("height", height)
+      .style("position", "absolute")
+      .style("top", "0px")
+      .style("left", "0px");
+
+    this.svg = d3.select(container).append("svg")
       .attr("width", width)
       .attr("height", width)
 
