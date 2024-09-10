@@ -24,9 +24,8 @@ export let activations: {[key: string]: nn.ActivationFunction} = {
   "relu": nn.Activations.RELU,
   "tanh": nn.Activations.TANH,
   "sigmoid": nn.Activations.SIGMOID,
-  "linear": nn.Activations.LINEAR
-  "concentric-circles": dataset.classifyConcentricCircles,
-
+  "linear": nn.Activations.LINEAR,
+};
 /** A map between names and regularization functions. */
 export let regularizations: {[key: string]: nn.RegularizationFunction} = {
   "none": null,
@@ -40,6 +39,7 @@ export let datasets: {[key: string]: dataset.DataGenerator} = {
   "xor": dataset.classifyXORData,
   "gauss": dataset.classifyTwoGaussData,
   "spiral": dataset.classifySpiralData,
+  "concentric-circles": dataset.classifyConcentricCircles
 };
 
 /** A map between dataset names and functions that generate regression data. */
