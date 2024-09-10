@@ -60,8 +60,7 @@ export class HeatMap {
 
     this.svg = d3.select(container).append("svg")
       .attr("width", width)
-      .attr("height", width)
-      .node(); // Ensure the SVG element is properly initialized
+      .attr("height", width);
 
     this.xScale = d3.scale.linear().domain(xDomain).range([0, width]);
     this.yScale = d3.scale.linear().domain(yDomain).range([width, 0]);
