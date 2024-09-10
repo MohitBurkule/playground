@@ -14,7 +14,7 @@ limitations under the License.
 ==============================================================================*/
 
 import {Example2D} from "./dataset";
-import * as THREE from 'three';
+import * as d3 from 'd3';
 
 export interface HeatMapSettings {
   [key: string]: any;
