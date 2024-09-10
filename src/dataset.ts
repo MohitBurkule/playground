@@ -207,6 +207,43 @@ export function classifyXORData(numSamples: number, noise: number):
 }
 
 /**
+ * Generates a concentric circles dataset for classification.
+ */
+export function classifyConcentricCircles(numSamples: number, noise: number): Example2D[] {
+  let points: Example2D[] = [];
+  let n = numSamples / 2;
+
+  function genCircle(radius: number, label: number) {
+    for (let i = 0; i < n; i++) {
+      let angle = randUniform(0, 2 * Math.PI);
+      let x = radius * Math.cos(angle) + randUniform(-1, 1) * noise;
+      let y = radius * Math.sin(angle) + randUniform(-1, 1) * noise;
+      points.push({x, y, label});
+    }
+  }
+
+  genCircle(2, 1);  // Inner circle
+  genCircle(4, -1); // Outer circle
+  return points;
+}
+
+/**
+ * Generates a sine wave dataset for regression.
+ */
+export function regressSineWave(numSamples: number, noise: number): Example2D[] {
+  let points: Example2D[] = [];
+  let frequency = 0.5;
+  let amplitude = 1;
+
+  for (let i = 0; i < numSamples; i++) {
+    let x = randUniform(-10, 10);
+    let y = amplitude * Math.sin(frequency * x) + randUniform(-1, 1) * noise;
+    points.push({x, y, label: y});
+  }
+  return points;
+}
+
+/**
  * Returns a sample from a uniform [a, b] distribution.
  * Uses the seedrandom library as the random generator.
  */
