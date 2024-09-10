@@ -14,7 +14,7 @@ limitations under the License.
 ==============================================================================*/
 
 import {Example2D} from "./dataset";
-import * as THREE from 'three';
+import * as d3 from 'd3';
 
 export interface HeatMapSettings {
   [key: string]: any;
@@ -35,12 +35,8 @@ export class HeatMap {
     showAxes: false,
     noSvg: false
   };
-  private scene;
-  private camera;
-  private renderer;
-  private geometry;
-  private material;
-  private mesh;
+  private xScale;
+  private yScale;
   private numSamples: number;
   private color;
   private canvas;
@@ -61,26 +57,82 @@ export class HeatMap {
       }
     }
 
-    this.scene = new THREE.Scene();
-    this.camera = new THREE.PerspectiveCamera(75, width / width, 0.1, 1000);
-    this.renderer = new THREE.WebGLRenderer();
-    this.renderer.setSize(width, width);
-    container.appendChild(this.renderer.domElement);
+    this.xScale = d3.scale.linear()
+      .domain(xDomain)
+      .range([0, width - 2 * padding]);
 
-    this.geometry = new THREE.BoxGeometry(width, width, width);
-    this.material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    this.mesh = new THREE.Mesh(this.geometry, this.material);
-    this.scene.add(this.mesh);
+    this.yScale = d3.scale.linear()
+      .domain(yDomain)
+      .range([height - 2 * padding, 0]);
 
-    this.camera.position.z = 5;
-    this.animate();
-  }
+    // Get a range of colors.
+    let tmpScale = d3.scale.linear<string, number>()
+        .domain([0, .5, 1])
+        .range(["#f59322", "#e8eaeb", "#0877bd"])
+        .clamp(true);
+    // Due to numerical error, we need to specify
+    // d3.range(0, end + small_epsilon, step)
+    // in order to guarantee that we will have end/step entries with
+    // the last element being equal to end.
+    let colors = d3.range(0, 1 + 1E-9, 1 / NUM_SHADES).map(a => {
+      return tmpScale(a);
+    });
+    this.color = d3.scale.quantize()
+                     .domain([-1, 1])
+                     .range(colors);
 
-  private animate() {
-    requestAnimationFrame(() => this.animate());
-    this.mesh.rotation.x += 0.01;
-    this.mesh.rotation.y += 0.01;
-    this.renderer.render(this.scene, this.camera);
+    container = container.append("div")
+      .style({
+        width: `${width}px`,
+        height: `${height}px`,
+        position: "relative",
+        top: `-${padding}px`,
+        left: `-${padding}px`
+      });
+    this.canvas = container.append("canvas")
+      .attr("width", numSamples)
+      .attr("height", numSamples)
+      .style("width", (width - 2 * padding) + "px")
+      .style("height", (height - 2 * padding) + "px")
+      .style("position", "absolute")
+      .style("top", `${padding}px`)
+      .style("left", `${padding}px`);
+
+    if (!this.settings.noSvg) {
+      this.svg = container.append("svg").attr({
+          "width": width,
+          "height": height
+      }).style({
+        // Overlay the svg on top of the canvas.
+        "position": "absolute",
+        "left": "0",
+        "top": "0"
+      }).append("g")
+        .attr("transform", `translate(${padding},${padding})`);
+
+      this.svg.append("g").attr("class", "train");
+      this.svg.append("g").attr("class", "test");
+    }
+
+    if (this.settings.showAxes) {
+      let xAxis = d3.svg.axis()
+        .scale(this.xScale)
+        .orient("bottom");
+
+      let yAxis = d3.svg.axis()
+        .scale(this.yScale)
+        .orient("right");
+
+      this.svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", `translate(0,${height - 2 * padding})`)
+        .call(xAxis);
+
+      this.svg.append("g")
+        .attr("class", "y axis")
+        .attr("transform", "translate(" + (width - 2 * padding) + ",0)")
+        .call(yAxis);
+    }
   }
 
   updateTestPoints(points: Example2D[]): void {
