@@ -15,6 +15,7 @@ limitations under the License.
 
 import {Example2D} from "./dataset";
 import * as d3 from 'd3';
+import * as d3ScaleChromatic from 'd3-scale-chromatic';
 
 export interface HeatMapSettings {
   [key: string]: any;
@@ -35,12 +36,10 @@ export class HeatMap {
     showAxes: false,
     noSvg: false
   };
-  private scene;
-  private camera;
-  private renderer;
-  private geometry;
-  private material;
-  private mesh;
+  private svg;
+  private xScale;
+  private yScale;
+  private colorScale;
   private numSamples: number;
   private color;
   private canvas;
@@ -61,26 +60,24 @@ export class HeatMap {
       }
     }
 
-    this.scene = new THREE.Scene();
-    this.camera = new THREE.PerspectiveCamera(75, width / width, 0.1, 1000);
-    this.renderer = new THREE.WebGLRenderer();
-    this.renderer.setSize(width, width);
-    container.appendChild(this.renderer.domElement);
+    this.svg = d3.select(container).append("svg")
+      .attr("width", width)
+      .attr("height", width);
 
-    this.geometry = new THREE.BoxGeometry(width, width, width);
-    this.material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    this.mesh = new THREE.Mesh(this.geometry, this.material);
-    this.scene.add(this.mesh);
+    this.xScale = d3.scaleLinear().domain(xDomain).range([0, width]);
+    this.yScale = d3.scaleLinear().domain(yDomain).range([width, 0]);
 
-    this.camera.position.z = 5;
-    this.animate();
-  }
+    this.colorScale = d3.scaleSequential(d3ScaleChromatic.interpolateViridis)
+      .domain([0, 1]);
 
-  private animate() {
-    requestAnimationFrame(() => this.animate());
-    this.mesh.rotation.x += 0.01;
-    this.mesh.rotation.y += 0.01;
-    this.renderer.render(this.scene, this.camera);
+    this.svg.selectAll("rect")
+      .data(d3.range(numSamples * numSamples))
+      .enter().append("rect")
+      .attr("x", d => this.xScale(d % numSamples))
+      .attr("y", d => this.yScale(Math.floor(d / numSamples)))
+      .attr("width", width / numSamples)
+      .attr("height", width / numSamples)
+      .style("fill", d => this.colorScale(Math.random()));
   }
 
   updateTestPoints(points: Example2D[]): void {
