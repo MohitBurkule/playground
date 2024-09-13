@@ -476,15 +476,15 @@ g.column rect {
   margin: 0 14px 14px 0;
 }
 
-.data.column .dataset:nth-of-type(2n) {
-  margin-right: 0;
-}
+/*.data.column .dataset:nth-of-type(2n) {*/
+/*  margin-right: 0;*/
+/*}*/
 
 .data.column .data-thumbnail {
   cursor: pointer;
   width: 100%;
   height: 100%;
-  opacity: 0.2;
+  opacity: 0.8;
   border: 2px solid rgba(255,255,255,0.1);
   border-radius: 3px;
 }
