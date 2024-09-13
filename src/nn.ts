@@ -67,22 +67,8 @@ export class Node {
     this.output = this.activation.output(this.totalInput);
     return this.output;
   }
-  public static GELU: ActivationFunction = {
-    output: x => 0.5 * x * (1 + Math.tanh(Math.sqrt(2 / Math.PI) * (x + 0.044715 * Math.pow(x, 3)))),
-    der: x => {
-      const tanhPart = Math.tanh(Math.sqrt(2 / Math.PI) * (x + 0.044715 * Math.pow(x, 3)));
-      return 0.5 * (1 + tanhPart) + 0.5 * x * (1 - Math.pow(tanhPart, 2)) * Math.sqrt(2 / Math.PI) * (1 + 3 * 0.044715 * Math.pow(x, 2));
-    }
-  };
-  public static LEAKY_RELU: ActivationFunction = {
-    output: x => x >= 0 ? x : 0.01 * x,
-    der: x => x >= 0 ? 1 : 0.01
-  };
-  public static PReLU: (alpha: number) => ActivationFunction = (alpha) => ({
-    output: x => x >= 0 ? x : alpha * x,
-    der: x => x >= 0 ? 1 : alpha
-  });
 
+}
 /**
  * An error function and its derivative.
  */
@@ -148,6 +134,21 @@ export class Activations {
     output: x => x,
     der: x => 1
   };
+  public static GELU: ActivationFunction = {
+    output: x => 0.5 * x * (1 + (Math as any).tanh(Math.sqrt(2 / Math.PI) * (x + 0.044715 * Math.pow(x, 3)))),
+    der: x => {
+      const tanhPart = (Math as any).tanh(Math.sqrt(2 / Math.PI) * (x + 0.044715 * Math.pow(x, 3)));
+      return 0.5 * (1 + tanhPart) + 0.5 * x * (1 - Math.pow(tanhPart, 2)) * Math.sqrt(2 / Math.PI) * (1 + 3 * 0.044715 * Math.pow(x, 2));
+    }
+  };
+  public static LEAKY_RELU: ActivationFunction = {
+    output: x => x >= 0 ? x : 0.01 * x,//TODO: make this a parameter
+    der: x => x >= 0 ? 1 : 0.01
+  };
+  public static PReLU: (alpha: number) => ActivationFunction = (alpha) => ({
+    output: x => x >= 0 ? x : alpha * x,
+    der: x => x >= 0 ? 1 : alpha
+  });
 }
 
 /** Build-in regularization functions */
