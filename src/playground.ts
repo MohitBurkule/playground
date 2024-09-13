@@ -206,6 +206,13 @@ function makeGUI() {
     oneStep();
   });
 
+  d3.select("#seed").on("input", function() {
+    state.seed = this.value;
+    Math.seedrandom(state.seed);
+    state.serialize();
+    userHasInteracted();
+  });
+
   d3.select("#data-regen-button").on("click", () => {
     generateData();
     parametersChanged = true;
