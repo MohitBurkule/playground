@@ -72,6 +72,8 @@ let INPUTS: {[name: string]: InputFeature} = {
   "sinY": {f: (x, y) => Math.sin(y), label: "sin(X_2)"},
   "atan2YX":{f: (x,y) => Math.atan2(y,x), label: "sptheta"},
   "normXY":{f: (x,y) => Math.sqrt(x*x+y*y), label: "spradius"},
+  "abs(x-y)":{f: (x,y) => Math.abs(x-y), label: "|X_1-X_2|"},
+  "abs(y-x)":{f: (x,y) => Math.abs(y-x), label: "|X_2-X_1|"},
     
 };
 
