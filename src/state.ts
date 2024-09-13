@@ -130,6 +130,8 @@ export class State {
     {name: "ySquared", type: Type.BOOLEAN},
     {name: "cosX", type: Type.BOOLEAN},
     {name: "sinX", type: Type.BOOLEAN},
+    {name: "absx_y", type: Type.BOOLEAN},
+    {name: "absy_x", type: Type.BOOLEAN},
     {name: "cosY", type: Type.BOOLEAN},
     {name: "sinY", type: Type.BOOLEAN},
     {name: "collectStats", type: Type.BOOLEAN},
@@ -166,6 +168,8 @@ export class State {
   sinX = false;
   cosY = false;
   sinY = false;
+  absy_x= false;
+  absx_y=false
   dataset: dataset.DataGenerator = dataset.classifyCircleData;
   regDataset: dataset.DataGenerator = dataset.regressPlane;
   seed: string;
