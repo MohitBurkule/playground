@@ -28,8 +28,9 @@ import {
 import {Example2D, shuffle} from "./dataset";
 import {AppendingLineChart} from "./linechart";
 import * as d3 from 'd3';
+import {compile} from 'mathjs';
 
-let mainWidth;
+let mainWidth
 
 // More scrolling
 d3.select(".more button").on("click", function() {
@@ -57,23 +58,25 @@ enum HoverType {
   BIAS, WEIGHT
 }
 
+type FN = ((x: number, y: number) => number)
+
 interface InputFeature {
-  f: (x: number, y: number) => number;
+  f: FN | any;
   label?: string;
 }
 
 let INPUTS: {[name: string]: InputFeature} = {
-  "x": {f: (x, y) => x, label: "X_1"},
-  "y": {f: (x, y) => y, label: "X_2"},
-  "xSquared": {f: (x, y) => x * x, label: "X_1^2"},
-  "ySquared": {f: (x, y) => y * y,  label: "X_2^2"},
-  "xTimesY": {f: (x, y) => x * y, label: "X_1X_2"},
-  "sinX": {f: (x, y) => Math.sin(x), label: "sin(X_1)"},
-  "sinY": {f: (x, y) => Math.sin(y), label: "sin(X_2)"},
+  "x": {f: (x, y) => x, label: "x"},
+  "y": {f: (x, y) => y, label: "y"},
+  "xSquared": {f: (x, y) => x * x, label: "x^2"},
+  "ySquared": {f: (x, y) => y * y,  label: "y^2"},
+  "xTimesY": {f: (x, y) => x * y, label: "x*y"},
+  "sinX": {f: (x, y) => Math.sin(x), label: "sin(x)"},
+  "sinY": {f: (x, y) => Math.sin(y), label: "sin(y)"},
   "atan2YX":{f: (x,y) => Math.atan2(y,x), label: "sptheta"},
   "normXY":{f: (x,y) => Math.sqrt(x*x+y*y), label: "spradius"},
-  "absx_y":{f: (x,y) => Math.abs(x-y), label: "|X_1-X_2|"},
-  "absy_x":{f: (x,y) => Math.abs(y-x), label: "|X_2-X_1|"},
+  "absx_y":{f: (x,y) => Math.abs(x-y), label: "|x-y|"},
+  "absy_x":{f: (x,y) => Math.abs(y-x), label: "|y-x|"},
     
 };
 
@@ -868,7 +871,11 @@ function updateDecisionBoundary(network: nn.Node[][], firstTime: boolean) {
       if (firstTime) {
         // Go through all predefined inputs.
         for (let nodeId in INPUTS) {
-          boundary[nodeId][i][j] = INPUTS[nodeId].f(x, y);
+          if (INPUTS[nodeId].f instanceof Function) {
+            boundary[nodeId][i][j] = INPUTS[nodeId].f(x, y);
+          } else {
+            boundary[nodeId][i][j] = INPUTS[nodeId].f.eval({x:x,y:y});
+          }
         }
       }
     }
@@ -938,7 +945,11 @@ function constructInput(x: number, y: number): number[] {
   let input: number[] = [];
   for (let inputName in INPUTS) {
     if (state[inputName]) {
-      input.push(INPUTS[inputName].f(x, y));
+      if (INPUTS[inputName].f instanceof Function) {
+        input.push(INPUTS[inputName].f(x, y));
+      } else {
+        input.push(INPUTS[inputName].f.eval({x:x,y:y}))
+      }
     }
   }
   return input;
@@ -1167,3 +1178,23 @@ makeGUI();
 generateData(true);
 reset(true);
 hideControls();
+
+
+function makeid(length) {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    let counter = 0;
+    while (counter < length) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      counter += 1;
+    }
+    return result;
+}
+
+document.querySelector("#addinput").addEventListener("click", () => {
+  const form = prompt("enter formula:") 
+  if(!form) return;
+  INPUTS[makeid(8)] = {f: compile(form), label: form}
+  reset()
+})
