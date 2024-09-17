@@ -143,7 +143,8 @@ export class State {
     {name: "tutorial", type: Type.STRING},
     {name: "problem", type: Type.OBJECT, keyMap: problems},
     {name: "initZero", type: Type.BOOLEAN},
-    {name: "hideText", type: Type.BOOLEAN}
+    {name: "hideText", type: Type.BOOLEAN},
+    {name: "editColor", type: Type.NUMBER}
   ];
 
   [key: string]: any;
@@ -175,8 +176,11 @@ export class State {
   sinY = false;
   absy_x= false;
   absx_y=false
+  editColor = -1;
   dataset: dataset.DataGenerator = dataset.classifyCircleData;
   regDataset: dataset.DataGenerator = dataset.regressPlane;
+  trainData: dataset.Example2D[] = [];
+  testData: dataset.Example2D[] = [];
   seed: string;
 
   /**
