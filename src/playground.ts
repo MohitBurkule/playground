@@ -1031,7 +1031,7 @@ function reset(onStartup=false) {
   let outputActivation = (state.problem === Problem.REGRESSION) ?
       nn.Activations.LINEAR : nn.Activations.TANH;
   network = nn.buildNetwork(shape, state.activation, outputActivation,
-      state.regularization, constructInputIds(), state.initZero);
+constructInputIds(), state.initZero);
   lossTrain = getLoss(network, state.trainData);
   lossTest = getLoss(network, state.testData);
   drawNetwork(network);
