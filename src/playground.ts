@@ -22,6 +22,7 @@ import {
   activations,
   problems,
   regularizations,
+  weightQuantizations,
   getKeyFromValue,
   Problem
 } from "./state";
@@ -53,6 +54,8 @@ const BIAS_SIZE = 5;
 const NUM_SAMPLES_CLASSIFY = 500;
 const NUM_SAMPLES_REGRESS = 1200;
 const DENSITY = 100;
+const HEATMAP_MIN = -6;
+const HEATMAP_MAX = 6;
 
 enum HoverType {
   BIAS, WEIGHT
@@ -162,7 +165,7 @@ state.getHiddenProps().forEach(prop => {
 let boundary: {[id: string]: number[][]} = {};
 let selectedNodeId: string = null;
 // Plot the heatmap.
-let xDomain: [number, number] = [-6, 6];
+let xDomain: [number, number] = [HEATMAP_MIN, HEATMAP_MAX];
 let heatMap =
     new HeatMap(300, DENSITY, xDomain, xDomain, d3.select("#heatmap"),
         {showAxes: true});
@@ -381,7 +384,8 @@ function makeGUI() {
       function() {
     state.regularization = regularizations[this.value];
     parametersChanged = true;
-    reset();
+    state.serialize();
+    userHasInteracted();
   });
   regularDropdown.property("value",
       getKeyFromValue(regularizations, state.regularization));
@@ -389,9 +393,20 @@ function makeGUI() {
   let regularRate = d3.select("#regularRate").on("change", function() {
     state.regularizationRate = +this.value;
     parametersChanged = true;
-    reset();
+    state.serialize();
+    userHasInteracted();
   });
   regularRate.property("value", state.regularizationRate);
+
+  let weightQuantizationDropdown = d3.select("#weightQuantization").on("change", 
+      function() {
+    state.weightQuantization = weightQuantizations[this.value];
+    parametersChanged = true;
+    state.serialize();
+    userHasInteracted();
+  });
+  weightQuantizationDropdown.property("value",
+      getKeyFromValue(weightQuantizations, state.weightQuantization));
 
   let problem = d3.select("#problem").on("change", function() {
     state.problem = problems[this.value];
@@ -693,6 +708,9 @@ function drawNetwork(network: nn.Node[][]): void {
     getRelativeHeight(d3.select("#network"))
   );
   d3.select(".column.features").style("height", height + "px");
+
+  // Now "draw" it as JavaScript
+  d3.select("#network-as-javascript").text(nn.compileNetworkToJs(network));
 }
 
 function getRelativeHeight(selection) {
@@ -864,7 +882,7 @@ function updateDecisionBoundary(network: nn.Node[][], firstTime: boolean) {
       let x = xScale(i);
       let y = yScale(j);
       let input = constructInput(x, y);
-      nn.forwardProp(network, input);
+      nn.forwardProp(network, input, state.weightQuantization);
       nn.forEachNode(network, true, node => {
         boundary[node.id][i][j] = node.output;
       });
@@ -887,7 +905,7 @@ function getLoss(network: nn.Node[][], dataPoints: Example2D[]): number {
   for (let i = 0; i < dataPoints.length; i++) {
     let dataPoint = dataPoints[i];
     let input = constructInput(dataPoint.x, dataPoint.y);
-    let output = nn.forwardProp(network, input);
+    let output = nn.forwardProp(network, input, state.weightQuantization);
     loss += nn.Errors.SQUARE.error(output, dataPoint.label);
   }
   return loss / dataPoints.length;
@@ -929,6 +947,9 @@ function updateUI(firstStep = false) {
   d3.select("#loss-test").text(humanReadable(lossTest));
   d3.select("#iter-number").text(addCommas(zeroPad(iter)));
   lineChart.addDataPoint([lossTrain, lossTest]);
+
+  // Now "draw" it as JavaScript
+  d3.select("#network-as-javascript").text(nn.compileNetworkToJs(network));
 }
 
 function constructInputIds(): string[] {
@@ -959,10 +980,10 @@ function oneStep(): void {
   iter++;
   state.trainData.forEach((point, i) => {
     let input = constructInput(point.x, point.y);
-    nn.forwardProp(network, input);
+    nn.forwardProp(network, input, state.weightQuantization);
     nn.backProp(network, point.label, nn.Errors.SQUARE);
     if ((i + 1) % state.batchSize === 0) {
-      nn.updateWeights(network, state.learningRate, state.regularizationRate);
+      nn.updateWeights(network, state.learningRate, state.regularization, state.regularizationRate);
     }
   });
   // Compute the loss.
@@ -1089,7 +1110,7 @@ function hideControls() {
     controls.style("display", "none");
   });
 
-  // Also add checkbox for each hidable control in the "use it in classrom"
+  // Also add checkbox for each hidable control in the "use it in classroom"
   // section.
   let hideControls = d3.select(".hide-controls");
   HIDABLE_CONTROLS.forEach(([text, id]) => {
@@ -1133,6 +1154,9 @@ function generateData(firstTime = false) {
   Math.seedrandom(state.seed);
   let numSamples = (state.problem === Problem.REGRESSION) ?
       NUM_SAMPLES_REGRESS : NUM_SAMPLES_CLASSIFY;
+  if (state.dataset === datasets.three) {
+    numSamples = NUM_SAMPLES_CLASSIFY * 2
+  }
   let generator = state.problem === Problem.CLASSIFICATION ?
       state.dataset : state.regDataset;
   let data = generator(numSamples, state.noise / 100);
