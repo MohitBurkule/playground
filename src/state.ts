@@ -11,6 +11,8 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+Modified by David Cato
 ==============================================================================*/
 
 import * as nn from "./nn";
@@ -25,6 +27,9 @@ export let activations: {[key: string]: nn.ActivationFunction} = {
   "tanh": nn.Activations.TANH,
   "sigmoid": nn.Activations.SIGMOID,
   "linear": nn.Activations.LINEAR,
+  "sine": nn.Activations.SINE,
+  "sinc": nn.Activations.SINC,
+  "mish": nn.Activations.MISH,
   "gelu": nn.Activations.GELU,
   "leaky-relu": nn.Activations.LEAKY_RELU,
   "prelu": nn.Activations.PReLU(0.2), // Default alpha value for PReLU
@@ -36,6 +41,15 @@ export let regularizations: {[key: string]: nn.RegularizationFunction} = {
   "L2": nn.RegularizationFunction.L2
 };
 
+/** Whether to quantize the weights. */
+export let weightQuantizations: {[key: string]: nn.WeightQuantizationFunction} = {
+  "none": null,
+  "16-bit": nn.WeightQuantizationFunction.q16bit,
+  "8-bit": nn.WeightQuantizationFunction.q8bit,
+  "4-bit": nn.WeightQuantizationFunction.q4bit,
+  "2-bit": nn.WeightQuantizationFunction.q2bit
+};
+
 /** A map between dataset names and functions that generate classification data. */
 export let datasets: {[key: string]: dataset.DataGenerator} = {
   "circle": dataset.classifyCircleData,
@@ -44,7 +58,8 @@ export let datasets: {[key: string]: dataset.DataGenerator} = {
   "spiral": dataset.classifySpiralData,
   "concentric-circles": dataset.classifyConcentricCircles,
   "biclusters": dataset.classifyBiclusters,
-  "moons": dataset.classifyMoons
+  "moons": dataset.classifyMoons,
+  "three": dataset.classifyMNISTThreeData,
 };
 
 /** A map between dataset names and functions that generate regression data. */
@@ -117,6 +132,7 @@ export class State {
   private static PROPS: Property[] = [
     {name: "activation", type: Type.OBJECT, keyMap: activations},
     {name: "regularization", type: Type.OBJECT, keyMap: regularizations},
+    {name: "weightQuantization", type: Type.OBJECT, keyMap: weightQuantizations},
     {name: "batchSize", type: Type.NUMBER},
     {name: "dataset", type: Type.OBJECT, keyMap: datasets},
     {name: "regDataset", type: Type.OBJECT, keyMap: regDatasets},
@@ -158,6 +174,7 @@ export class State {
   percTrainData = 50;
   activation = nn.Activations.TANH;
   regularization: nn.RegularizationFunction = null;
+  weightQuantization: nn.WeightQuantizationFunction = null;
   problem = Problem.CLASSIFICATION;
   initZero = false;
   hideText = false;
