@@ -27,7 +27,7 @@
         "copyfiles": "1.0.0",
         "rimraf": "2.5.4",
         "serve": "^14.2.3",
-        "tsify": "^4.0.0",
+        "tsify": "^5.0.4",
         "typescript": "^2.9",
         "uglify-js": "^2.8.29",
         "watchify": "^4.0.0"
