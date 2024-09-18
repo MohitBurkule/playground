@@ -24,7 +24,7 @@
         "@types/d3": "^3.5.34",
         "concat": "^1.0.3",
         "concurrently": "9.0.1",
-        "copyfiles": "1.0.0",
+        "copyfiles": "2.4.1",
         "rimraf": "6.0.1",
         "serve": "^14.2.3",
         "tsify": "^5.0.4",
