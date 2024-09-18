@@ -23,7 +23,7 @@
     "devDependencies": {
         "@types/d3": "^3.5.34",
         "concat": "^1.0.3",
-        "concurrently": "3.1.0",
+        "concurrently": "9.0.1",
         "copyfiles": "1.0.0",
         "rimraf": "6.0.1",
         "serve": "^14.2.3",
