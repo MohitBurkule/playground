@@ -55,7 +55,7 @@ export function shuffle(array: any[]): void {
  */
 export function classifyHashData(numSamples: number, noise: number): Example2D[] {
   let points: Example2D[] = [];
-  let gridSize = 10; // Define the size of the grid
+  let gridSize = 3; // Define the size of the grid
 
   for (let i = 0; i < numSamples; i++) {
     let x = randUniform(-5, 5);
