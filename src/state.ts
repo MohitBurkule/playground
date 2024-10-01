@@ -44,7 +44,8 @@ export let datasets: {[key: string]: dataset.DataGenerator} = {
   "spiral": dataset.classifySpiralData,
   "concentric-circles": dataset.classifyConcentricCircles,
   "biclusters": dataset.classifyBiclusters,
-  "moons": dataset.classifyMoons
+  "moons": dataset.classifyMoons,
+  "hash": dataset.classifyHashData
 };
 
 /** A map between dataset names and functions that generate regression data. */
