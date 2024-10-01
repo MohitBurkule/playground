@@ -34,7 +34,6 @@ type Point = {
  * library as the random generator.
  */
 export function shuffle(array: any[]): void {
-  Math.seedrandom(state.seed); // Ensure the seed is set before shuffling
   let counter = array.length;
   let temp = 0;
   let index = 0;
