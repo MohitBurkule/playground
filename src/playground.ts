@@ -22,14 +22,16 @@ import {
   activations,
   problems,
   regularizations,
+  weightQuantizations,
   getKeyFromValue,
   Problem
 } from "./state";
 import {Example2D, shuffle} from "./dataset";
 import {AppendingLineChart} from "./linechart";
 import * as d3 from 'd3';
+import {compile} from 'mathjs';
 
-let mainWidth;
+let mainWidth
 
 // More scrolling
 d3.select(".more button").on("click", function() {
@@ -52,28 +54,32 @@ const BIAS_SIZE = 5;
 const NUM_SAMPLES_CLASSIFY = 500;
 const NUM_SAMPLES_REGRESS = 1200;
 const DENSITY = 100;
+const HEATMAP_MIN = -6;
+const HEATMAP_MAX = 6;
 
 enum HoverType {
   BIAS, WEIGHT
 }
 
+type FN = ((x: number, y: number) => number)
+
 interface InputFeature {
-  f: (x: number, y: number) => number;
+  f: FN | any;
   label?: string;
 }
 
 let INPUTS: {[name: string]: InputFeature} = {
-  "x": {f: (x, y) => x, label: "X_1"},
-  "y": {f: (x, y) => y, label: "X_2"},
-  "xSquared": {f: (x, y) => x * x, label: "X_1^2"},
-  "ySquared": {f: (x, y) => y * y,  label: "X_2^2"},
-  "xTimesY": {f: (x, y) => x * y, label: "X_1X_2"},
-  "sinX": {f: (x, y) => Math.sin(x), label: "sin(X_1)"},
-  "sinY": {f: (x, y) => Math.sin(y), label: "sin(X_2)"},
+  "x": {f: (x, y) => x, label: "x"},
+  "y": {f: (x, y) => y, label: "y"},
+  "xSquared": {f: (x, y) => x * x, label: "x^2"},
+  "ySquared": {f: (x, y) => y * y,  label: "y^2"},
+  "xTimesY": {f: (x, y) => x * y, label: "x*y"},
+  "sinX": {f: (x, y) => Math.sin(x), label: "sin(x)"},
+  "sinY": {f: (x, y) => Math.sin(y), label: "sin(y)"},
   "atan2YX":{f: (x,y) => Math.atan2(y,x), label: "sptheta"},
   "normXY":{f: (x,y) => Math.sqrt(x*x+y*y), label: "spradius"},
-  "absx_y":{f: (x,y) => Math.abs(x-y), label: "|X_1-X_2|"},
-  "absy_x":{f: (x,y) => Math.abs(y-x), label: "|X_2-X_1|"},
+  "absx_y":{f: (x,y) => Math.abs(x-y), label: "|x-y|"},
+  "absy_x":{f: (x,y) => Math.abs(y-x), label: "|y-x|"},
     
 };
 
@@ -93,6 +99,7 @@ let HIDABLE_CONTROLS = [
   ["Noise level", "noise"],
   ["Batch size", "batchSize"],
   ["# of hidden layers", "numHiddenLayers"],
+  ["Paint Platform", "paintPlatform"],
 ];
 
 class Player {
@@ -158,7 +165,7 @@ state.getHiddenProps().forEach(prop => {
 let boundary: {[id: string]: number[][]} = {};
 let selectedNodeId: string = null;
 // Plot the heatmap.
-let xDomain: [number, number] = [-6, 6];
+let xDomain: [number, number] = [HEATMAP_MIN, HEATMAP_MAX];
 let heatMap =
     new HeatMap(300, DENSITY, xDomain, xDomain, d3.select("#heatmap"),
         {showAxes: true});
@@ -171,8 +178,6 @@ let colorScale = d3.scale.linear<string, number>()
                      .range(["#f59322", "#e8eaeb", "#0877bd"])
                      .clamp(true);
 let iter = 0;
-let trainData: Example2D[] = [];
-let testData: Example2D[] = [];
 let network: nn.Node[][] = null;
 let lossTrain = 0;
 let lossTest = 0;
@@ -276,11 +281,44 @@ function makeGUI() {
     reset();
   });
 
+  // For changing state on different selections
+  d3.select("#select-orange").on("change", function() {
+    state.editColor = this.checked ? -1 : 1
+    state.serialize()
+    userHasInteracted()
+  });
+
+  d3.select("#select-blue").on("change", function() {
+    state.editColor = this.checked ? 1 : -1
+    state.serialize()
+    userHasInteracted()
+  });
+
+  // On drag, we want to paint our canvas with the dots.
+  let dragBehavior = d3.behavior.drag().on("drag", function() {
+    let isVisible = d3.select("#select-platform").style("display") === "block"
+    if(state.problem === Problem.CLASSIFICATION && isVisible) {
+      let [x, y] = d3.mouse(this)
+      let label = state.editColor
+      let padding = 20
+      let maxScale = 5.0
+      let factor = 23.07
+      x -= padding
+      y -= padding
+      x = x/factor - maxScale
+      y = maxScale - y/factor
+      state.trainData.push({x, y, label})
+      heatMap.updatePoints(state.trainData);
+    }
+  });
+
+  d3.select("#heatmap").call(dragBehavior);
+
   let showTestData = d3.select("#show-test-data").on("change", function() {
     state.showTestData = this.checked;
     state.serialize();
     userHasInteracted();
-    heatMap.updateTestPoints(state.showTestData ? testData : []);
+    heatMap.updateTestPoints(state.showTestData ? state.testData : []);
   });
   // Check/uncheck the checkbox according to the current state.
   showTestData.property("checked", state.showTestData);
@@ -353,7 +391,8 @@ function makeGUI() {
       function() {
     state.regularization = regularizations[this.value];
     parametersChanged = true;
-    reset();
+    state.serialize();
+    userHasInteracted();
   });
   regularDropdown.property("value",
       getKeyFromValue(regularizations, state.regularization));
@@ -361,12 +400,24 @@ function makeGUI() {
   let regularRate = d3.select("#regularRate").on("change", function() {
     state.regularizationRate = +this.value;
     parametersChanged = true;
-    reset();
+    state.serialize();
+    userHasInteracted();
   });
   regularRate.property("value", state.regularizationRate);
 
+  let weightQuantizationDropdown = d3.select("#weightQuantization").on("change", 
+      function() {
+    state.weightQuantization = weightQuantizations[this.value];
+    parametersChanged = true;
+    state.serialize();
+    userHasInteracted();
+  });
+  weightQuantizationDropdown.property("value",
+      getKeyFromValue(weightQuantizations, state.weightQuantization));
+
   let problem = d3.select("#problem").on("change", function() {
     state.problem = problems[this.value];
+    togglePaintSelection();
     generateData();
     drawDatasetThumbnails();
     parametersChanged = true;
@@ -664,6 +715,9 @@ function drawNetwork(network: nn.Node[][]): void {
     getRelativeHeight(d3.select("#network"))
   );
   d3.select(".column.features").style("height", height + "px");
+
+  // Now "draw" it as JavaScript
+  d3.select("#network-as-javascript").text(nn.compileNetworkToJs(network));
 }
 
 function getRelativeHeight(selection) {
@@ -835,14 +889,18 @@ function updateDecisionBoundary(network: nn.Node[][], firstTime: boolean) {
       let x = xScale(i);
       let y = yScale(j);
       let input = constructInput(x, y);
-      nn.forwardProp(network, input);
+      nn.forwardProp(network, input, state.weightQuantization);
       nn.forEachNode(network, true, node => {
         boundary[node.id][i][j] = node.output;
       });
       if (firstTime) {
         // Go through all predefined inputs.
         for (let nodeId in INPUTS) {
-          boundary[nodeId][i][j] = INPUTS[nodeId].f(x, y);
+          if (INPUTS[nodeId].f instanceof Function) {
+            boundary[nodeId][i][j] = INPUTS[nodeId].f(x, y);
+          } else {
+            boundary[nodeId][i][j] = INPUTS[nodeId].f.eval({x:x,y:y});
+          }
         }
       }
     }
@@ -854,7 +912,7 @@ function getLoss(network: nn.Node[][], dataPoints: Example2D[]): number {
   for (let i = 0; i < dataPoints.length; i++) {
     let dataPoint = dataPoints[i];
     let input = constructInput(dataPoint.x, dataPoint.y);
-    let output = nn.forwardProp(network, input);
+    let output = nn.forwardProp(network, input, state.weightQuantization);
     loss += nn.Errors.SQUARE.error(output, dataPoint.label);
   }
   return loss / dataPoints.length;
@@ -896,6 +954,9 @@ function updateUI(firstStep = false) {
   d3.select("#loss-test").text(humanReadable(lossTest));
   d3.select("#iter-number").text(addCommas(zeroPad(iter)));
   lineChart.addDataPoint([lossTrain, lossTest]);
+
+  // Now "draw" it as JavaScript
+  d3.select("#network-as-javascript").text(nn.compileNetworkToJs(network));
 }
 
 function constructInputIds(): string[] {
@@ -912,7 +973,11 @@ function constructInput(x: number, y: number): number[] {
   let input: number[] = [];
   for (let inputName in INPUTS) {
     if (state[inputName]) {
-      input.push(INPUTS[inputName].f(x, y));
+      if (INPUTS[inputName].f instanceof Function) {
+        input.push(INPUTS[inputName].f(x, y));
+      } else {
+        input.push(INPUTS[inputName].f.eval({x:x,y:y}))
+      }
     }
   }
   return input;
@@ -920,17 +985,17 @@ function constructInput(x: number, y: number): number[] {
 
 function oneStep(): void {
   iter++;
-  trainData.forEach((point, i) => {
+  state.trainData.forEach((point, i) => {
     let input = constructInput(point.x, point.y);
-    nn.forwardProp(network, input);
+    nn.forwardProp(network, input, state.weightQuantization);
     nn.backProp(network, point.label, nn.Errors.SQUARE);
     if ((i + 1) % state.batchSize === 0) {
-      nn.updateWeights(network, state.learningRate, state.regularizationRate);
+      nn.updateWeights(network, state.learningRate, state.regularization, state.regularizationRate);
     }
   });
   // Compute the loss.
-  lossTrain = getLoss(network, trainData);
-  lossTest = getLoss(network, testData);
+  lossTrain = getLoss(network, state.trainData);
+  lossTest = getLoss(network, state.testData);
   updateUI();
 }
 
@@ -961,6 +1026,11 @@ function reset(onStartup=false) {
   d3.select("#layers-label").text("Hidden layer" + suffix);
   d3.select("#num-layers").text(state.numHiddenLayers);
 
+  togglePaintSelection()
+  // Correct radio button on reset
+  let radioColor = state.editColor === - 1 ? "#select-orange" : "#select-blue";
+  d3.select(radioColor).attr("checked", "checked")
+
   // Make a simple network.
   iter = 0;
   let numInputs = constructInput(0 , 0).length;
@@ -968,9 +1038,9 @@ function reset(onStartup=false) {
   let outputActivation = (state.problem === Problem.REGRESSION) ?
       nn.Activations.LINEAR : nn.Activations.TANH;
   network = nn.buildNetwork(shape, state.activation, outputActivation,
-      state.regularization, constructInputIds(), state.initZero);
-  lossTrain = getLoss(network, trainData);
-  lossTest = getLoss(network, testData);
+constructInputIds(), state.initZero);
+  lossTrain = getLoss(network, state.trainData);
+  lossTest = getLoss(network, state.testData);
   drawNetwork(network);
   updateUI(true);
 };
@@ -1012,7 +1082,7 @@ function drawDatasetThumbnails() {
     let data = dataGenerator(200, 0);
     data.forEach(function(d) {
       context.fillStyle = colorScale(d.label);
-      context.fillRect(w * (d.x + 6) / 12, h * (d.y + 6) / 12, 4, 4);
+      context.fillRect(w * (d.x + 6) / 12, h - h * (d.y + 6) / 12 - 4, 4, 4);
     });
     d3.select(canvas.parentNode).style("display", null);
   }
@@ -1047,7 +1117,7 @@ function hideControls() {
     controls.style("display", "none");
   });
 
-  // Also add checkbox for each hidable control in the "use it in classrom"
+  // Also add checkbox for each hidable control in the "use it in classroom"
   // section.
   let hideControls = d3.select(".hide-controls");
   HIDABLE_CONTROLS.forEach(([text, id]) => {
@@ -1076,6 +1146,11 @@ function hideControls() {
     .attr("href", window.location.href);
 }
 
+function togglePaintSelection() {
+  let visiblity = state.problem === Problem.CLASSIFICATION ? "" : "none"
+  d3.select("#select-platform").style("display", visiblity);
+}
+
 function generateData(firstTime = false) {
   if (!firstTime) {
     // Change the seed.
@@ -1086,6 +1161,9 @@ function generateData(firstTime = false) {
   Math.seedrandom(state.seed);
   let numSamples = (state.problem === Problem.REGRESSION) ?
       NUM_SAMPLES_REGRESS : NUM_SAMPLES_CLASSIFY;
+  if (state.dataset === datasets.three) {
+    numSamples = NUM_SAMPLES_CLASSIFY * 2
+  }
   let generator = state.problem === Problem.CLASSIFICATION ?
       state.dataset : state.regDataset;
   let data = generator(numSamples, state.noise / 100);
@@ -1093,10 +1171,10 @@ function generateData(firstTime = false) {
   shuffle(data);
   // Split into train and test data.
   let splitIndex = Math.floor(data.length * state.percTrainData / 100);
-  trainData = data.slice(0, splitIndex);
-  testData = data.slice(splitIndex);
-  heatMap.updatePoints(trainData);
-  heatMap.updateTestPoints(state.showTestData ? testData : []);
+  state.trainData = data.slice(0, splitIndex);
+  state.testData = data.slice(splitIndex);
+  heatMap.updatePoints(state.trainData);
+  heatMap.updateTestPoints(state.showTestData ? state.testData : []);
 }
 
 let firstInteraction = true;
@@ -1131,3 +1209,23 @@ makeGUI();
 generateData(true);
 reset(true);
 hideControls();
+
+
+function makeid(length) {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    let counter = 0;
+    while (counter < length) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      counter += 1;
+    }
+    return result;
+}
+
+document.querySelector("#addinput").addEventListener("click", () => {
+  const form = prompt("enter formula:") 
+  if(!form) return;
+  INPUTS[makeid(8)] = {f: compile(form), label: form}
+  reset()
+})
