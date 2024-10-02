@@ -46,7 +46,7 @@ Modified by David Cato
     <!-- <script src="lib.js"></script> -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
-<script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+
 </head>
 
 <body>
@@ -499,7 +499,7 @@ Modified by David Cato
             darkModeToggle.checked = darkModeEnabled;
             lightStyle.disabled = darkModeEnabled;
             darkStyle.disabled = !darkModeEnabled;
-        });
+        
 
         // Update stored preference on toggle change
         document.getElementById('dark-mode-toggle').addEventListener('change', function() {
@@ -511,10 +511,12 @@ Modified by David Cato
             darkStyle.disabled = !darkModeEnabled;
             localStorage.setItem('dark-mode-enabled', darkModeEnabled);
         });
+    });
     </script>
     <script src="bundle.js"></script>
     <!-- Google analytics -->
     <script src="analytics.js"></script>
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
 </body>
 
 </html>
