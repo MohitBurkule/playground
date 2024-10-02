@@ -26,14 +26,14 @@ Modified by David Cato
     <meta property="og:type" content="article" />
     <meta property="og:title" content="Neural Network Playground" />
     <meta property="og:description" content="Tinker with a real neural network right here in your browser.">
-    <meta property="og:url" content="https://dcato98.github.io/playground" />
-    <meta property="og:image" content="https://dcato98.github.io/playground/preview.png" />
+    <meta property="og:url" content="https://mohitburkule.github.io/playground" />
+    <meta property="og:image" content="https://mohitburkule.github.io/playground/preview.png" />
 
     <meta name="twitter:card" value="summary_large_image">
     <meta name="twitter:title" content="Neural Network Playground">
     <meta name="twitter:description" content="Tinker with a real neural network right here in your browser.">
-    <meta name="twitter:url" content="https://dcato98.github.io/playground">
-    <meta name="twitter:image" content="https://dcato98.github.io/playground/preview.png">
+    <meta name="twitter:url" content="https://mohitburkule.github.io/playground">
+    <meta name="twitter:image" content="https://mohitburkule.github.io/playground/preview.png">
     <meta name="twitter:image:width" content="560">
     <meta name="twitter:image:height" content="295">
 
@@ -61,6 +61,7 @@ Modified by David Cato
     </label>
     <header>
         <h1 class="l--page">Tinker With a <b>Neural Network</b> <span class="optional">Right Here </span>in Your Browser.<br>Don’t Worry, You Can’t Break It. We Promise.</h1>
+        <p class="l--page" style="display: flex;justify-content: center;">Made with ❤️ by Google, improved by Mohit Burkule</p>
     </header>
 
     <!-- Top Controls -->
@@ -100,7 +101,11 @@ Modified by David Cato
                     </select>
                 </div>
             </div>
-            <div class="control ui-activation">
+            <div class="control ui-seed">
+        <label for="seed">Random Seed</label>
+        <input type="text" id="seed" value="0.12345" />
+      </div>
+      <div class="control ui-activation">
                 <label for="activations">Activation</label>
                 <div class="select">
                     <select id="activations">
@@ -183,7 +188,10 @@ Modified by David Cato
                     <div class="dataset" title="Circle">
                         <canvas class="data-thumbnail" data-dataset="circle"></canvas>
                     </div>
-                    <div class="dataset" title="Concentric Circles">
+                    <div class="dataset" title="Hash">
+            <canvas class="data-thumbnail" data-dataset="hash"></canvas>
+          </div>
+          <div class="dataset" title="Concentric Circles">
                         <canvas class="data-thumbnail" data-dataset="concentric-circles"></canvas>
                     </div>
                     <div class="dataset" title="Sine Wave">
@@ -429,7 +437,7 @@ Modified by David Cato
         <div class="l--body">
             <h2>Credits</h2>
             <p>
-                This version of the NN Playground was created by David Cato.
+                This version of the NN Playground was created by Mohit Burkule , with adaptations from David Cato.
             </p>
             <p>
                 The original NN Playground was created by Daniel Smilkov and Shan Carter as a continuation of many people’s previous work — most notably Andrej Karpathy’s <a href="http://cs.stanford.edu/people/karpathy/convnetjs/demo/classify2d.html">convnet.js demo</a>

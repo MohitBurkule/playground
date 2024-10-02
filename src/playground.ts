@@ -78,8 +78,8 @@ let INPUTS: {[name: string]: InputFeature} = {
   "sinY": {f: (x, y) => Math.sin(y), label: "sin(y)"},
   "atan2YX":{f: (x,y) => Math.atan2(y,x), label: "sptheta"},
   "normXY":{f: (x,y) => Math.sqrt(x*x+y*y), label: "spradius"},
-  "absx_y":{f: (x,y) => Math.abs(x-y), label: "|x-y|"},
-  "absy_x":{f: (x,y) => Math.abs(y-x), label: "|y-x|"},
+  "absx_y":{f: (x,y) => Math.abs(x-y)-3, label: "|x-y|-3"},
+  "absx_y_add":{f: (x,y) => Math.abs(x+y)-3, label: "|x+y|-3"},
     
 };
 
@@ -209,6 +209,13 @@ function makeGUI() {
       simulationStarted();
     }
     oneStep();
+  });
+
+  d3.select("#seed").on("input", function() {
+    state.seed = this.value;
+    Math.seedrandom(state.seed);
+    state.serialize();
+    userHasInteracted();
   });
 
   d3.select("#data-regen-button").on("click", () => {

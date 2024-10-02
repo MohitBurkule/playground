@@ -50,6 +50,24 @@ export function shuffle(array: any[]): void {
   }
 }
 
+/**
+ * Generates a hash-like dataset for classification.
+ */
+export function classifyHashData(numSamples: number, noise: number): Example2D[] {
+  let points: Example2D[] = [];
+  let gridSize = 3; // Define the size of the grid
+
+  for (let i = 0; i < numSamples; i++) {
+    let x = randUniform(-5, 5);
+    let y = randUniform(-5, 5);
+    let noiseX = randUniform(-1, 1) * noise;
+    let noiseY = randUniform(-1, 1) * noise;
+    let label = ((Math.floor((x + noiseX) / gridSize) + Math.floor((y + noiseY) / gridSize)) % 2 === 0) ? 1 : -1;
+    points.push({x, y, label});
+  }
+  return points;
+}
+
 export type DataGenerator = (numSamples: number, noise: number) => Example2D[];
 
 export function classifyTwoGaussData(numSamples: number, noise: number):

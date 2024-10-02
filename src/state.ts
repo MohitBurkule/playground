@@ -59,6 +59,7 @@ export let datasets: {[key: string]: dataset.DataGenerator} = {
   "concentric-circles": dataset.classifyConcentricCircles,
   "biclusters": dataset.classifyBiclusters,
   "moons": dataset.classifyMoons,
+  "hash": dataset.classifyHashData,
   "three": dataset.classifyMNISTThreeData,
 };
 
@@ -152,7 +153,7 @@ export class State {
     {name: "cosX", type: Type.BOOLEAN},
     {name: "sinX", type: Type.BOOLEAN},
     {name: "absx_y", type: Type.BOOLEAN},
-    {name: "absy_x", type: Type.BOOLEAN},
+    {name: "absx_y_add", type: Type.BOOLEAN},
     {name: "cosY", type: Type.BOOLEAN},
     {name: "sinY", type: Type.BOOLEAN},
     {name: "collectStats", type: Type.BOOLEAN},
@@ -191,7 +192,7 @@ export class State {
   sinX = false;
   cosY = false;
   sinY = false;
-  absy_x= false;
+  absx_y_add= false;
   absx_y=false
   editColor = -1;
   dataset: dataset.DataGenerator = dataset.classifyCircleData;
