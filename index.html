@@ -490,28 +490,28 @@ Modified by David Cato
     </footer>
     <script>
         // Check stored preference on page load
-        window.addEventListener('DOMContentLoaded', (event) => {
-            const darkModeToggle = document.getElementById('dark-mode-toggle');
-            const lightStyle = document.getElementById('light-style');
-            const darkStyle = document.getElementById('dark-style');
-            const darkModeEnabled = localStorage.getItem('dark-mode-enabled') === 'true';
+    //     window.addEventListener('DOMContentLoaded', (event) => {
+    //         const darkModeToggle = document.getElementById('dark-mode-toggle');
+    //         const lightStyle = document.getElementById('light-style');
+    //         const darkStyle = document.getElementById('dark-style');
+    //         const darkModeEnabled = localStorage.getItem('dark-mode-enabled') === 'true';
 
-            darkModeToggle.checked = darkModeEnabled;
-            lightStyle.disabled = darkModeEnabled;
-            darkStyle.disabled = !darkModeEnabled;
+    //         darkModeToggle.checked = darkModeEnabled;
+    //         lightStyle.disabled = darkModeEnabled;
+    //         darkStyle.disabled = !darkModeEnabled;
         
 
-        // Update stored preference on toggle change
-        document.getElementById('dark-mode-toggle').addEventListener('change', function() {
-            const lightStyle = document.getElementById('light-style');
-            const darkStyle = document.getElementById('dark-style');
-            const darkModeEnabled = this.checked;
+    //     // Update stored preference on toggle change
+    //     document.getElementById('dark-mode-toggle').addEventListener('change', function() {
+    //         const lightStyle = document.getElementById('light-style');
+    //         const darkStyle = document.getElementById('dark-style');
+    //         const darkModeEnabled = this.checked;
 
-            lightStyle.disabled = darkModeEnabled;
-            darkStyle.disabled = !darkModeEnabled;
-            localStorage.setItem('dark-mode-enabled', darkModeEnabled);
-        });
-    });
+    //         lightStyle.disabled = darkModeEnabled;
+    //         darkStyle.disabled = !darkModeEnabled;
+    //         localStorage.setItem('dark-mode-enabled', darkModeEnabled);
+    //     });
+    // });
     </script>
     <script src="bundle.js"></script>
     <!-- Google analytics -->
